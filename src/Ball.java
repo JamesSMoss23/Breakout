@@ -3,16 +3,19 @@ import acm.graphics.GOval;
 
 public class Ball extends GOval {
 
+
     private double deltaX = 1;
     private double deltaY = -1;
     private GCanvas screen;
     public boolean lost = false;
+
 
     public Ball(double x, double y, double size, GCanvas screen){
         super(x, y, size, size);
         setFilled(true);
         this.screen = screen;
     }
+
 
     public void handleMove(){
         // move the ball
@@ -24,13 +27,16 @@ public class Ball extends GOval {
             deltaY *= -1;
         }
 
+
+
         // check to see if the ball is too low
         if(getY() >= screen.getHeight() - getHeight()){
-            // set the lost flag
+            // lose a life
             lost = true;
             deltaX = 1;
             deltaY = -1;
         }
+
 
         // check to see if the ball hits the left side of the screen
         if(getX() <= 0){
@@ -43,24 +49,31 @@ public class Ball extends GOval {
             // start moving left
             deltaX *= -1;
         }
+
+
     }
 
     public void bounce(){
-        // flip the y direction
+        //flip deltaY value
         deltaY *= -1;
     }
 
+
     public void bounceLeft(){
-        // flip the y direction
+        //flip deltaY value
         deltaY *= -1;
-        // force the x direction to be negative
+
+        //force deltaX to be negative
         deltaX = -Math.abs(deltaX);
     }
 
+
     public void bounceRight(){
-        // flip the y direction
+        //flip deltaY value
         deltaY *= -1;
-        // force the x direction to be positive
-        deltaX = Math.abs(deltaX);
+
+        //force deltaX to be positive
+        deltaX = -Math.abs(deltaX);
     }
+
 }

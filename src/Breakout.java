@@ -1,27 +1,31 @@
+import acm.graphics.GLabel;
 import acm.graphics.GObject;
+import acm.graphics.GOval;
 import acm.program.GraphicsProgram;
+import svu.csc213.Dialog;
 
+import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseEvent;
 
 public class Breakout extends GraphicsProgram {
 
-    /*
-    1) no lives
-    2) all the bricks only take one hit
-    3) what happens when I run out of lives
-    4) lives display
-    5) how many bricks broken
+    //Lives
+    //Brick Hitpoints
+    //Life Counter
+    //Point System
+    //Game Over
+    //Brick Hitmarker
+    //Way to Win / Multiple levels
 
-    6) powerups?
-    7. more than one level?
-     */
-
-
-
+    public int wug;
 
     private Ball ball;
     private Paddle paddle;
+
+    private JLabel lifeCounter;
+    private int points;
+    private JLabel pointCounter;
 
     private int numBricksInRow;
 
@@ -29,18 +33,27 @@ public class Breakout extends GraphicsProgram {
 
     @Override
     public void init(){
+        int lives = 3;
 
-        numBricksInRow = (int) (getWidth() / (Brick.WIDTH + 5.0));
+        lifeCounter = new JLabel("Lives: " + lives);
+        add(lifeCounter, NORTH);
+
+        pointCounter = new JLabel("Points: " + points);
+        add(pointCounter, NORTH);
+
+        numBricksInRow = getWidth() / (Brick.WIDTH + 5);
 
         for (int row = 0; row < 10; row++) {
             for (int col = 0; col < numBricksInRow; col++) {
 
                 double brickX = 10 + col * (Brick.WIDTH + 5);
-                double brickY = 4 * Brick.HEIGHT + row * (Brick.HEIGHT + 5);
+                double brickY = Brick.HEIGHT + row * (Brick.HEIGHT + 5);
 
                 Brick brick = new Brick(brickX, brickY, rowColors[row], row);
                 add(brick);
+
             }
+
         }
 
         ball = new Ball(getWidth()/2, 350, 10, this.getGCanvas());
@@ -48,6 +61,7 @@ public class Breakout extends GraphicsProgram {
 
         paddle = new Paddle(230, 430, 50 ,10);
         add(paddle);
+
     }
 
     @Override
@@ -66,89 +80,97 @@ public class Breakout extends GraphicsProgram {
     }
 
     private void gameLoop(){
-        while(true){
-            // move the ball
+        int lives = 3;
+
+        while (true){
+
             ball.handleMove();
 
-            // handle collisions
             handleCollisions();
 
-            // handle losing the ball
-            if(ball.lost){
+            if (ball.lost){
                 handleLoss();
+                lives = lives - 1;
+                lifeCounter.setText("Lives Left: " + lives);
             }
 
-            pause(5);
+            if (lives == 0){
+                Dialog.showMessage("You Lost");
+                System.exit(0);
+            }
+
+            pause(4);
         }
+
+
     }
 
-    private void handleCollisions(){
-        // obj can store what we hit
+    private void handleCollisions() {
+
         GObject obj = null;
 
-        // check to see if the ball is about to hit something
-
-        if(obj == null){
-            // check the top right corner
-            obj = this.getElementAt(ball.getX()+ball.getWidth(), ball.getY());
+        if (obj == null){
+            obj = this.getElementAt(ball.getX() + ball.getWidth(), ball.getY());
         }
 
-        if(obj == null){
-            // check the top left corner
-            obj = this.getElementAt(ball.getX(), ball.getY());
+        if (obj == null){
+            obj = this.getElementAt(ball.getX() - ball.getWidth(), ball.getY());
         }
 
-        //check the bottom right corner for collision
-        if (obj == null) {
-            obj = this.getElementAt(ball.getX() + ball.getWidth(), ball.getY() + ball.getHeight());
-        }
-        //check the bottom left corner for collision
-        if (obj == null) {
+        if (obj == null){
             obj = this.getElementAt(ball.getX(), ball.getY() + ball.getHeight());
         }
 
-        // see if we hit something
-        if(obj != null){
+        if (obj == null){
+            obj = this.getElementAt(ball.getX() + ball.getWidth(), ball.getY() + ball.getHeight());
+        }
 
-            // lets see what we hit!
-            if(obj instanceof Paddle){
+        if (obj != null){
 
-                if(ball.getX() < (paddle.getX() + (paddle.getWidth() * .2))){
-                    // did I hit the left side of the paddle?
+            if (obj instanceof Paddle){
+
+                if (ball.getX() < (paddle.getX()) + paddle.getWidth() * .2){
+                    //left edge of the paddle
                     ball.bounceLeft();
-                } else if(ball.getX() > (paddle.getX() + (paddle.getWidth() * .8))) {
-                    // did I hit the right side of the paddle?
+                }else if (ball.getX() > paddle.getX() + paddle.getWidth() * .8){
                     ball.bounceRight();
-                } else {
-                    // did I hit the middle of the paddle?
+                }else{
+                    //middle of the paddle
                     ball.bounce();
                 }
 
             }
 
-
-            if(obj instanceof Brick){
-                // bounce the ball
+            if (obj instanceof Brick){
                 ball.bounce();
-                // destroy the brick
-                this.remove(obj);
+                if(((Brick) obj).hitPoints == 1){
+                    this.remove(obj);
+                } else {
+                    ((Brick) obj).hitPoints = ((Brick) obj).hitPoints - 1;
+                    ((Brick) obj).setFillColor(((Brick) obj).getFillColor().darker());
+                }
+
+                points = points + 1;
+                pointCounter.setText("points: " + points);
+
             }
+
 
         }
 
-        // if by the end of the method obj is still null, we hit nothing
     }
 
-    private void handleLoss(){
+    private void handleLoss() {
         ball.lost = false;
         reset();
     }
 
-    private void reset(){
+    private void reset() {
+        paddle.setLocation( 230 ,430);
         ball.setLocation(getWidth()/2, 350);
-        paddle.setLocation(230, 430);
         waitForClick();
     }
+
 
     public static void main(String[] args) {
         new Breakout().start();
