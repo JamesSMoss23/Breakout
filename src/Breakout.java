@@ -35,7 +35,7 @@ public class Breakout extends GraphicsProgram {
     public void init(){
         int lives = 3;
 
-        lifeCounter = new JLabel("Lives: " + lives);
+        lifeCounter = new JLabel("Lives Left: " + lives);
         add(lifeCounter, NORTH);
 
         pointCounter = new JLabel("Points: " + points);
@@ -59,7 +59,7 @@ public class Breakout extends GraphicsProgram {
         ball = new Ball(getWidth()/2, 350, 10, this.getGCanvas());
         add(ball);
 
-        paddle = new Paddle(230, 430, 50 ,10);
+        paddle = new Paddle(230, 430, 70 ,10);
         add(paddle);
 
     }
